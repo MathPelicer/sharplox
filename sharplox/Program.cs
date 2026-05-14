@@ -1,57 +1,83 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 
-if (args.Length > 1)
+public class Program
 {
-    Console.WriteLine("Usage: SharpLox [script]");
-    Environment.Exit(64);
-}
-else if(args.Length == 1)
-{
-    RunFiles(args[0]);
-}
-else
-{
-    RunPrompt();
-}
+    static bool _hadError = false;
 
-void RunFiles(string path)
-{
-    try
+    public static void Main(string[] args)
     {
-        byte[] bytes = File.ReadAllBytes(path);  
-        Run(Encoding.Default.GetString(bytes));
-    }
-    catch(Exception)
-    {
-        throw;
-    }
-}
-
-void RunPrompt()
-{
-    TextReader textInput = Console.In;
-    
-    for(;;)
-    {
-        Console.WriteLine("> ");
-        var line = textInput.ReadLine();
-        if(line == null)
+        if (args.Length > 1)
         {
-            break;
+            Console.WriteLine("Usage: SharpLox [script]");
+            Environment.Exit(64);
         }
-        Run(line);
+        else if (args.Length == 1)
+        {
+            RunFiles(args[0]);
+        }
+        else
+        {
+            RunPrompt();
+        }   
     }
-}
 
-void Run(string source)
-{
-    // Scanner scanner = new(source);
-    // List<Token> tokens = scanner.ScanTokens();
+    private static void RunFiles(string path)
+    {
+        try
+        {
+            byte[] bytes = File.ReadAllBytes(path);
+            Run(Encoding.Default.GetString(bytes));
 
-    // foreach(var token in tokens)
-    // {
-    //     Console.WriteLine(token);
-    // }
+            if(_hadError)
+            {
+                Environment.Exit(65);
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    private static void RunPrompt()
+    {
+        TextReader textInput = Console.In;
+
+        for (; ; )
+        {
+            Console.WriteLine("> ");
+            var line = textInput.ReadLine();
+            
+            if (line == null)
+            {
+                break;
+            }
+
+            Run(line);
+            
+            _hadError = false;
+        }
+    }
+
+    private static void Run(string source)
+    {
+        // Scanner scanner = new(source);
+        // List<Token> tokens = scanner.ScanTokens();
+
+        // foreach(var token in tokens)
+        // {
+        //     Console.WriteLine(token);
+        // }
+    }
+
+    private static void Error(int line, string message)
+    {
+        Report(line, "", message);
+    }
+
+    private static void Report(int line, string where, string message)
+    {
+        Console.WriteLine($"[line {line}] Error {where}: {message}");
+        var hadError = true;
+    }
 }
