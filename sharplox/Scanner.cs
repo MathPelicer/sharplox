@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace sharplox;
 
 public class Scanner(string source)
@@ -39,11 +37,69 @@ public class Scanner(string source)
             case '-': AddToken(TokenType.MINUS); break;
             case '*': AddToken(TokenType.STAR); break;
             case ';': AddToken(TokenType.SEMICOLON); break;
-
+            case '!':
+                AddToken(Match('=') ? TokenType.BANG_EQUAL : TokenType.BANG); 
+                break;
+            case '=':
+                AddToken(Match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL); 
+                break;
+            case '<':
+                AddToken(Match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+                break;
+            case '>':
+                AddToken(Match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER); 
+                break; 
+            case '/':
+                if (Match('/')) // handling commentary
+                {
+                    while(Peek() != '\n' && !IsAtEnd())
+                    {
+                        Advance();
+                    }
+                }
+                else
+                {
+                    AddToken(TokenType.SLASH);
+                }
+                break;
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            case '\n':
+                line++;
+                break;
             default:
                 Program.Error(line, "Unexpected character.");
                 break;
         }
+    }
+
+    private char Peek()
+    {
+        if (IsAtEnd())
+        {
+            return '\0';
+        }
+
+        return _source.ElementAt(current);
+    }
+
+    private bool Match(char expected)
+    {
+        if (IsAtEnd())
+        {
+            return false;
+        }
+
+        if(_source.ElementAt(current) != expected)
+        {
+            return false;
+        }
+
+        // also advances the current count
+        current++;
+        return true;
     }
 
     private char Advance()
