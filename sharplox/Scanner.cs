@@ -39,6 +39,10 @@ public class Scanner(string source)
             case '-': AddToken(TokenType.MINUS); break;
             case '*': AddToken(TokenType.STAR); break;
             case ';': AddToken(TokenType.SEMICOLON); break;
+
+            default:
+                Program.Error(line, "Unexpected character.");
+                break;
         }
     }
 
