@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace sharplox;
 
 public class Scanner(string source)
@@ -69,10 +71,80 @@ public class Scanner(string source)
             case '\n':
                 line++;
                 break;
+            case '"':
+                StringScan();
+                break;
             default:
-                Program.Error(line, "Unexpected character.");
+                if (IsDigit(c))
+                {
+                    Number();
+                }
+                else
+                {
+                    Program.Error(line, "Unexpected character.");
+                }
                 break;
         }
+    }
+
+    private void Number()
+    {
+        while (IsDigit(Peek()))
+        {
+            Advance();
+        }
+
+        if(Peek() == '.' && IsDigit(PeekNext()))
+        {
+            Advance();
+            
+            while (IsDigit(Peek()))
+            {
+                Advance();
+            }
+        }
+
+        AddToken(TokenType.NUMBER, double.Parse(_source.Substring(start, current)));
+    }
+
+    private char PeekNext()
+    {
+        var nextCharIndex = current + 1;
+        if (nextCharIndex >= _source.Length)
+        {
+            return '\0';
+        }
+
+        return _source.ElementAt(nextCharIndex);
+    }
+
+    private bool IsDigit(char c)
+    {
+        return c >= '0' && c <= '9';
+    }
+
+    private void StringScan()
+    {
+        while(Peek() != '"' && !IsAtEnd())
+        {
+            if(Peek() == '\n')
+            {
+                line++;
+            }
+            
+            Advance();
+        }
+
+        if(IsAtEnd())
+        {
+            Program.Error(line, "Unterminated string.");
+            return;
+        }
+
+        Advance();
+
+        string value = _source.Substring(start + 1, current - 1);
+        AddToken(TokenType.STRING, value);
     }
 
     private char Peek()
