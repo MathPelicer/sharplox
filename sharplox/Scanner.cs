@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace sharplox;
 
 public class Scanner(string source)
@@ -10,6 +8,26 @@ public class Scanner(string source)
     private int start = 0; // first char in the lexeme thats being scanned
     private int current = 0; // current char being considered
     private int line = 1;
+
+    private static readonly Dictionary<string, TokenType> _keywords = new()
+    {
+        {"and", TokenType.AND},
+        {"class", TokenType.CLASS},
+        {"else", TokenType.ELSE},
+        {"false", TokenType.FALSE},
+        {"for", TokenType.FOR},
+        {"fun", TokenType.FUN},
+        {"if", TokenType.IF},
+        {"nil", TokenType.NIL},
+        {"or", TokenType.OR},
+        {"print", TokenType.PRINT},
+        {"return", TokenType.RETURN},
+        {"super", TokenType.SUPER},
+        {"this", TokenType.THIS},
+        {"true", TokenType.TRUE},
+        {"var", TokenType.VAR},
+        {"while", TokenType.WHILE}
+    };
 
     public List<Token> ScanTokens()
     {
@@ -79,12 +97,44 @@ public class Scanner(string source)
                 {
                     Number();
                 }
+                else if (IsAlpha(c))
+                {
+                    Identifier();
+                }
                 else
                 {
                     Program.Error(line, "Unexpected character.");
                 }
                 break;
         }
+    }
+
+    private void Identifier()
+    {
+        while (IsAlphaNumeric(Peek())){
+            Advance();
+        }
+
+        string text = _source.Substring(start, current);
+        
+        if(!_keywords.TryGetValue(text, out TokenType tokenType))
+        {
+            tokenType = TokenType.IDENTIFIER;
+        }
+
+        AddToken(tokenType);
+    }
+
+    private bool IsAlphaNumeric(char c)
+    {
+        return IsAlpha(c) || IsDigit(c);
+    }
+
+    private bool IsAlpha(char c)
+    {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+                c == '_';
     }
 
     private void Number()
