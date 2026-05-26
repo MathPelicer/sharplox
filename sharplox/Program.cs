@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using sharplox;
 
 public class Program
 {
@@ -61,13 +62,13 @@ public class Program
 
     private static void Run(string source)
     {
-        // Scanner scanner = new(source);
-        // List<Token> tokens = scanner.ScanTokens();
+        Scanner scanner = new(source);
+        List<Token> tokens = scanner.ScanTokens();
 
-        // foreach(var token in tokens)
-        // {
-        //     Console.WriteLine(token);
-        // }
+        foreach(var token in tokens)
+        {
+            Console.WriteLine(token);
+        }
     }
 
     public static void Error(int line, string message)

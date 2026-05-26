@@ -7,6 +7,8 @@ public class Scanner(string source)
 
     private int start = 0; // first char in the lexeme thats being scanned
     private int current = 0; // current char being considered
+
+    private int lexemeSize = 0;
     private int line = 1;
 
     private static readonly Dictionary<string, TokenType> _keywords = new()
@@ -34,6 +36,7 @@ public class Scanner(string source)
         while(!IsAtEnd())
         {
             start = current;
+            lexemeSize = 0;
             ScanToken();
         }
 
@@ -43,6 +46,8 @@ public class Scanner(string source)
 
     private void ScanToken()
     {
+        char test = _source.ElementAt(0);
+        char test2 = _source.ElementAt(1);
         char c = Advance();
 
         switch (c)
@@ -154,7 +159,7 @@ public class Scanner(string source)
             }
         }
 
-        AddToken(TokenType.NUMBER, double.Parse(_source.Substring(start, current)));
+        AddToken(TokenType.NUMBER, double.Parse(_source.Substring(start, lexemeSize)));
     }
 
     private char PeekNext()
@@ -193,7 +198,7 @@ public class Scanner(string source)
 
         Advance();
 
-        string value = _source.Substring(start + 1, current - 1);
+        string value = _source.Substring(start + 1, lexemeSize-2);
         AddToken(TokenType.STRING, value);
     }
 
@@ -226,6 +231,7 @@ public class Scanner(string source)
 
     private char Advance()
     {
+        lexemeSize++;
         return _source.ElementAt(current++);
     }
 
@@ -236,7 +242,7 @@ public class Scanner(string source)
 
     private void AddToken(TokenType tokenType, object literal)
     {
-        string text = _source.Substring(start, current);
+        string text = _source.Substring(start, lexemeSize);
         _tokens.Add(new Token(tokenType, text, literal, line));
     }
 
