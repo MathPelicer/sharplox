@@ -1,7 +1,4 @@
-﻿using System.Net.Mail;
-using System.Text;
-
-internal class Program
+﻿internal class Program
 {
     private static void Main(string[] args)
     {
@@ -29,7 +26,13 @@ internal class Program
 
         writer.WriteLine("namespace sharplox.Expressions;");
         writer.WriteLine();
-        writer.WriteLine($"public class {baseName}" + "{");
+        writer.WriteLine($"public abstract class {baseName}" + "{");
+
+        writer.WriteLine();
+        writer.WriteLine("    public abstract T Accept<T>(IVisitor<T> visitor);");
+        writer.WriteLine();
+
+        DefineVisitor(writer, baseName, types);
 
         foreach(var type in types)
         {
@@ -54,10 +57,29 @@ internal class Program
         {
             string type = field.Split(" ")[0];
             string name = field.Split(" ")[1];
-            writer.WriteLine($"        private readonly {type} _{name} = {name};");
+            writer.WriteLine($"        public readonly {type} _{name} = {name};");
+        }
+
+        writer.WriteLine("");
+        writer.WriteLine("        public override T Accept<T>(IVisitor<T> visitor){");
+        writer.WriteLine($"            return visitor.Visit{className}{baseName}(this);");
+        writer.WriteLine("        }");
+        
+
+        writer.WriteLine("    }");
+    }
+
+    public static void DefineVisitor(StreamWriter writer, string baseName, List<string> types)
+    {
+        writer.WriteLine("    public interface IVisitor<T>{");
+
+        foreach(var type in types)
+        {
+            string typeName = type.Split(":")[0].Trim();
+            writer.WriteLine($"        T Visit{typeName}{baseName}({typeName} {baseName.ToLower()});");    
         }
 
         writer.WriteLine("    }");
-        writer.WriteLine("");
+        writer.WriteLine();
     }
 }
