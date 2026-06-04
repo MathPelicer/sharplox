@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using sharplox;
+using sharplox.Expressions;
 
 public class Program
 {
@@ -14,12 +15,33 @@ public class Program
         }
         else if (args.Length == 1)
         {
-            RunFiles(args[0]);
+            if(args[0] == "123")
+            {
+                Test();
+            }
+            else
+            {
+                RunFiles(args[0]);    
+            }
         }
         else
         {
             RunPrompt();
         }   
+    }
+
+    private static void Test()
+    {
+        Expr expr = new Expr.Binary(
+            new Expr.Unary(
+                new Token(TokenType.MINUS, "-", null, 1),
+                new Expr.Literal(123)
+            ),
+            new Token(TokenType.STAR, "*", null, 1),
+            new Expr.Grouping(new Expr.Literal(45.67))
+        );
+
+        System.Console.WriteLine(new AstPrinter().Print(expr));
     }
 
     private static void RunFiles(string path)

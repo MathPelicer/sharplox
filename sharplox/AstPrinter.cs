@@ -5,9 +5,14 @@ namespace sharplox;
 
 public class AstPrinter : Expr.IVisitor<string>
 {
+    public string Print(Expr expr)
+    {
+        return expr.Accept(this);    
+    }
+
     public string VisitBinaryExpr(Expr.Binary expr)
     {
-        return Parenthesize(expr._op._lexeme, expr._left, expr._right);
+        return Parenthesize(expr._op.lexeme, expr._left, expr._right);
     }
 
     public string VisitGroupingExpr(Expr.Grouping expr)
@@ -27,7 +32,7 @@ public class AstPrinter : Expr.IVisitor<string>
 
     public string VisitUnaryExpr(Expr.Unary expr)
     {
-        return Parenthesize(expr._op._lexeme, expr._right);
+        return Parenthesize(expr._op.lexeme, expr._right);
     }
 
     private string Parenthesize(string name, params Expr[] exprs)
