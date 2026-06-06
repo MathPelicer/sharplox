@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -42,7 +43,79 @@ public class Parser(List<Token> tokens)
         return expr;
     }
 
+    // term -> factor ( ( "-" | "+" ) factor )* ;
     private Expr Term()
+    {
+        Expr expr = Factor();
+        while(Match(TokenType.MINUS, TokenType.PLUS))
+        {
+            Token op = Previous();
+            Expr right = Factor();
+            expr = new Expr.Binary(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    // factor -> unary ( ( "*" | "/" ) unary )* ;
+    private Expr Factor()
+    {
+        Expr expr = Unary();
+        while(Match(TokenType.STAR, TokenType.SLASH))
+        {
+            Token op = Previous();
+            Expr right = Unary();
+            expr = new Expr.Binary(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    // unary -> ( "!" | "-" ) unary
+    //        |  primary ;
+    private Expr Unary()
+    {
+        if(Match(TokenType.BANG, TokenType.MINUS))
+        {
+            Token op = Previous();
+            Expr right = Unary();
+            return new Expr.Unary(op, right);
+        }
+
+        return Primary();
+    }
+
+    // primary -> NUMBER | STRING | "true" | "false" | "nil"
+    //          | "(" expression ")" ;
+    private Expr Primary()
+    {
+        if (Match(TokenType.FALSE))
+        {
+            return new Expr.Literal(false);
+        }
+        else if (Match(TokenType.TRUE))
+        {
+            return new Expr.Literal(true);
+        }
+        else if (Match(TokenType.NIL))
+        {
+            return new Expr.Literal(null);
+        }
+
+        else if(Match(TokenType.NUMBER, TokenType.STRING))
+        {
+            return new Expr.Literal(Previous().literal);
+        }
+        else if (Match(TokenType.LEFT_PAREN))
+        {
+            Expr expr = Expression();
+            Consume(TokenType.RIGHT_PAREN, """Expect ')' after expression.""");
+            return new Expr.Grouping(expr);
+        }
+        return null;
+    }
+
+    private Token Consume(TokenType type, string message)
     {
         throw new NotImplementedException();
     }
