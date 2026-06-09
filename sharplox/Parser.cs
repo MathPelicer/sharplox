@@ -1,10 +1,11 @@
-using System.Runtime.InteropServices;
 using sharplox.Expressions;
 
 namespace sharplox;
 
 public class Parser(List<Token> tokens)
 {
+    internal class ParseError() : Exception {}
+
     private readonly List<Token> _tokens = tokens;
 
     private int current = 0;
@@ -117,12 +118,51 @@ public class Parser(List<Token> tokens)
 
     private Token Consume(TokenType type, string message)
     {
-        throw new NotImplementedException();
+        if (Check(type))
+        {
+            return Advance();
+        }
+
+        throw Error(Peek(), message);
     }
 
     private Token Previous()
     {
         return _tokens[current-1];
+    }
+
+    private static ParseError Error(Token token, string message)
+    {
+        Program.Error(token, message);
+        
+        return new ParseError();
+    }
+
+    private void Syncronize()
+    {
+        Advance();
+        while (!IsAtEnd())
+        {
+            if(Previous().tokenType == TokenType.SEMICOLON)
+            {
+                return;
+            }
+
+            switch (Peek().tokenType)
+            {
+                case TokenType.CLASS:
+                case TokenType.FOR:
+                case TokenType.FUN:
+                case TokenType.IF:
+                case TokenType.PRINT:
+                case TokenType.RETURN:
+                case TokenType.VAR:
+                case TokenType.WHILE:
+                    return;
+            }
+
+            Advance();
+        }
     }
 
     private bool Match(params TokenType[] types)
