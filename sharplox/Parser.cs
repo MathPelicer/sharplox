@@ -10,6 +10,18 @@ public class Parser(List<Token> tokens)
 
     private int current = 0;
 
+    private Expr? Parse()
+    {
+        try
+        {
+            return Expression();
+        }
+        catch (ParseError)
+        {
+            return null;
+        }
+    }
+
     private Expr Expression()
     {
         return Equality();
@@ -113,7 +125,8 @@ public class Parser(List<Token> tokens)
             Consume(TokenType.RIGHT_PAREN, """Expect ')' after expression.""");
             return new Expr.Grouping(expr);
         }
-        return null;
+        
+        throw Error(Peek(), "Expect expression.");
     }
 
     private Token Consume(TokenType type, string message)
