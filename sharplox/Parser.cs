@@ -10,7 +10,7 @@ public class Parser(List<Token> tokens)
 
     private int current = 0;
 
-    private Expr? Parse()
+    public Expr Parse()
     {
         try
         {

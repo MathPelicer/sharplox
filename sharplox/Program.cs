@@ -87,10 +87,20 @@ public class Program
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
 
-        foreach(var token in tokens)
+        // foreach(var token in tokens)
+        // {
+        //     Console.WriteLine(token);
+        // }
+
+        Parser parser = new Parser(tokens);
+        Expr expr = parser.Parse();
+
+        if (_hadError)
         {
-            Console.WriteLine(token);
+            return;
         }
+
+        Console.WriteLine(new AstPrinter().Print(expr));
     }
 
     public static void Error(int line, string message)
