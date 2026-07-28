@@ -17,12 +17,16 @@ public class Interpreter : Expr.IVisitor<Object>
             case TokenType.BANG_EQUAL:
                 return !IsEqual(left, right);
             case TokenType.GREATER:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left > (double)right;
             case TokenType.GREATER_EQUAL:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left >= (double)right;
             case TokenType.LESS:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left < (double)right;
             case TokenType.LESS_EQUAL:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left <= (double)right;
             case TokenType.PLUS:
                 if(left is double doubleLeft && right is double doubleRight)
@@ -35,16 +39,29 @@ public class Interpreter : Expr.IVisitor<Object>
                     return strLeft + strRight;
                 }
 
-                break;
+                throw new RuntimeError(expr._op, "Operands must be two numbers or two strings.");
             case TokenType.MINUS:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left - (double)right;
             case TokenType.SLASH:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left / (double)right;
             case TokenType.STAR:
+                CheckNumberOperands(expr._op, left, right);
                 return (double)left * (double)right; 
         }
 
         return null;
+    }
+
+    private void CheckNumberOperands(Token op, object left, object right)
+    {
+        if(left is double leftOperand && right is double rightOperand)
+        {
+            return;
+        }
+
+        throw new RuntimeError(op, "Operands must be a numbers.");
     }
 
     public object VisitGroupingExpr(Expr.Grouping expr)
@@ -64,12 +81,23 @@ public class Interpreter : Expr.IVisitor<Object>
         switch (expr._op.tokenType)
         {
             case TokenType.MINUS:
+                CheckNumberOperand(expr._op, right);
                 return -(double)right;
             case TokenType.BANG:
                 return !IsTruthy(right);
         }
 
         return null;
+    }
+
+    private void CheckNumberOperand(Token op, object operand)
+    {
+        if(operand is double doubleOperand)
+        {
+            return;
+        }
+
+        throw new RuntimeError(op, "Operand must be a number.");
     }
 
     private bool IsTruthy(object obj)
