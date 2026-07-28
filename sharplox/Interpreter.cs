@@ -5,6 +5,20 @@ namespace sharplox;
 
 public class Interpreter : Expr.IVisitor<Object>
 {
+    public void Interpret(Expr expr)
+    {
+        try
+        {
+            object value = Evaluate(expr);
+            Console.WriteLine(Stringify(value));
+        }
+        catch (RuntimeError err)
+        {
+            Program.RuntimeError(err);
+            throw;
+        }
+    }
+
     public object VisitBinaryExpr(Expr.Binary expr)
     {
         object left = Evaluate(expr._left);
@@ -54,16 +68,6 @@ public class Interpreter : Expr.IVisitor<Object>
         return null;
     }
 
-    private void CheckNumberOperands(Token op, object left, object right)
-    {
-        if(left is double leftOperand && right is double rightOperand)
-        {
-            return;
-        }
-
-        throw new RuntimeError(op, "Operands must be a numbers.");
-    }
-
     public object VisitGroupingExpr(Expr.Grouping expr)
     {
         throw new NotImplementedException();
@@ -88,16 +92,6 @@ public class Interpreter : Expr.IVisitor<Object>
         }
 
         return null;
-    }
-
-    private void CheckNumberOperand(Token op, object operand)
-    {
-        if(operand is double doubleOperand)
-        {
-            return;
-        }
-
-        throw new RuntimeError(op, "Operand must be a number.");
     }
 
     private bool IsTruthy(object obj)
@@ -131,5 +125,46 @@ public class Interpreter : Expr.IVisitor<Object>
         }
 
         return left.Equals(right);
+    }
+
+    private void CheckNumberOperand(Token op, object operand)
+    {
+        if(operand is double doubleOperand)
+        {
+            return;
+        }
+
+        throw new RuntimeError(op, "Operand must be a number.");
+    }
+
+    private void CheckNumberOperands(Token op, object left, object right)
+    {
+        if(left is double leftOperand && right is double rightOperand)
+        {
+            return;
+        }
+
+        throw new RuntimeError(op, "Operands must be a numbers.");
+    }
+
+    private static string Stringify(object value)
+    {
+        if(value is null)
+        {
+            return "nil";
+        }
+
+        if(value is double doubleValue)
+        {
+            string text = doubleValue.ToString();
+            if (text.EndsWith(".0"))
+            {
+                text = text.Substring(0, text.Length - 2);
+            }
+
+            return text;
+        }
+
+        return value.ToString();
     }
 }

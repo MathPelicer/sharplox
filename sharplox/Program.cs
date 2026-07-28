@@ -125,4 +125,9 @@ public class Program
         Console.WriteLine($"[line {line}] Error {where}: {message}");
         _hadError = true;
     }
+
+    internal static void RuntimeError(RuntimeError err)
+    {
+        throw new NotImplementedException();
+    }
 }
