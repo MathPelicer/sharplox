@@ -6,6 +6,10 @@ public class Program
 {
     static bool _hadError = false;
 
+    static bool _hadRuntimeError = false;
+
+    private static readonly Interpreter interpreter = new();
+
     public static void Main(string[] args)
     {
         if (args.Length > 1)
@@ -55,6 +59,10 @@ public class Program
             {
                 Environment.Exit(65);
             }
+            if (_hadRuntimeError)
+            {
+                Environment.Exit(70);
+            }
         }
         catch (Exception)
         {
@@ -100,7 +108,9 @@ public class Program
             return;
         }
 
-        Console.WriteLine(new AstPrinter().Print(expr));
+        interpreter.Interpret(expr);
+
+        //Console.WriteLine(new AstPrinter().Print(expr));
     }
 
     public static void Error(int line, string message)
@@ -128,6 +138,7 @@ public class Program
 
     internal static void RuntimeError(RuntimeError err)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"{err.Message} \n [Line {err._token.line}]");
+        _hadRuntimeError = true;
     }
 }

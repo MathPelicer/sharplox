@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -59,6 +58,7 @@ public class Interpreter : Expr.IVisitor<Object>
                 return (double)left - (double)right;
             case TokenType.SLASH:
                 CheckNumberOperands(expr._op, left, right);
+                IsNotDivisedByZero(expr._op, right);
                 return (double)left / (double)right;
             case TokenType.STAR:
                 CheckNumberOperands(expr._op, left, right);
@@ -145,6 +145,16 @@ public class Interpreter : Expr.IVisitor<Object>
         }
 
         throw new RuntimeError(op, "Operands must be a numbers.");
+    }
+
+    private static void IsNotDivisedByZero(Token op, object right)
+    {
+        if(op.tokenType == TokenType.SLASH && (double)right == 0)
+        {
+            throw new RuntimeError(op, "You cannot divide by zero");
+        }
+
+        return;
     }
 
     private static string Stringify(object value)
