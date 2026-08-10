@@ -2,20 +2,27 @@ using sharplox.Expressions;
 
 namespace sharplox;
 
-public class Interpreter : Expr.IVisitor<Object>
+public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 {
-    public void Interpret(Expr expr)
+    public void Interpret(List<Stmt> statements)
     {
         try
         {
-            object value = Evaluate(expr);
-            Console.WriteLine(Stringify(value));
+            foreach (var stmt in statements)
+            {
+                Execute(stmt);
+            }
         }
         catch (RuntimeError err)
         {
             Program.RuntimeError(err);
             throw;
         }
+    }
+
+    private void Execute(Stmt stmt)
+    {
+        stmt.Accept(this);
     }
 
     public object VisitBinaryExpr(Expr.Binary expr)
@@ -90,6 +97,20 @@ public class Interpreter : Expr.IVisitor<Object>
             case TokenType.BANG:
                 return !IsTruthy(right);
         }
+
+        return null;
+    }
+
+    public object? VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt._expression);
+        return null;
+    }
+
+    public object? VisitPrintStmt(Stmt.Print stmt)
+    {
+        object value = Evaluate(stmt._expression);
+        Console.WriteLine(Stringify(value));
 
         return null;
     }

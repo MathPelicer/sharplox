@@ -100,15 +100,15 @@ public class Program
         //     Console.WriteLine(token);
         // }
 
-        Parser parser = new Parser(tokens);
-        Expr expr = parser.Parse();
+        Parser parser = new(tokens);
+        List<Stmt> statements = parser.Parse();
 
         if (_hadError)
         {
             return;
         }
 
-        interpreter.Interpret(expr);
+        interpreter.Interpret(statements);
 
         //Console.WriteLine(new AstPrinter().Print(expr));
     }
