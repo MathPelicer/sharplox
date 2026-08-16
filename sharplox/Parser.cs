@@ -16,12 +16,48 @@ public class Parser(List<Token> tokens)
         List<Stmt> statements = [];
         while (!IsAtEnd())
         {
-            statements.Add(Statement());
+            statements.Add(Declaration());
         }
 
         return statements;
     }
 
+    // declaration -> varDecl
+    //              | statement ;
+    private Stmt Declaration()
+    {
+        try
+        {
+            if (Match(TokenType.VAR))
+            {
+                return VarDeclaration();
+            }
+
+            return Statement();
+        }
+        catch (ParseError err)
+        {
+            Syncronize();
+            return null;
+        }
+    }
+
+    private Stmt VarDeclaration()
+    {
+        Token name = Consume(TokenType.IDENTIFIER, "Expect variable name");
+
+        Expr? initializer = null;
+        if (Match(TokenType.EQUAL))
+        {
+            initializer = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' adter variable declaration");
+        return new Stmt.Var(name, initializer);
+    }
+
+    // statement -> exprStmt
+    //            | printStmt
     private Stmt Statement()
     {
         if (Match(TokenType.PRINT))
@@ -32,6 +68,7 @@ public class Parser(List<Token> tokens)
         return ExpressionStatement();
     }
 
+    // exprStmt -> expression ";" ;
     private Stmt ExpressionStatement()
     {
         Expr expr = Expression();
@@ -41,6 +78,7 @@ public class Parser(List<Token> tokens)
         return new Stmt.Expression(expr);
     }
 
+    // printStmt -> "print" expression ";" ; 
     private Stmt PrintStatement()
     {
         Expr value = Expression();
@@ -50,6 +88,7 @@ public class Parser(List<Token> tokens)
         return new Stmt.Print(value);
     }
 
+    // expression -> equality ;
     private Expr Expression()
     {
         return Equality();
@@ -146,6 +185,10 @@ public class Parser(List<Token> tokens)
         else if(Match(TokenType.NUMBER, TokenType.STRING))
         {
             return new Expr.Literal(Previous().literal);
+        }
+        else if (Match(TokenType.IDENTIFIER))
+        {
+            return new Expr.Variable(Previous());
         }
         else if (Match(TokenType.LEFT_PAREN))
         {
