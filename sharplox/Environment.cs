@@ -1,8 +1,21 @@
+using System.ComponentModel;
+
 namespace sharplox;
 
 public class Environment
 {
+    public readonly Environment? enclosing;
     private readonly Dictionary<string, object> _values = [];
+
+    public Environment()
+    {
+        enclosing = null;
+    }
+
+    public Environment(Environment enclosing)
+    {
+        this.enclosing = enclosing;
+    }
 
     public void Define(string name, object value)
     {
@@ -15,6 +28,11 @@ public class Environment
         {
             return _values[name.lexeme];    
         }
+
+        if(enclosing != null)
+        {
+            return enclosing.Get(name);
+        }
         
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
     }
@@ -24,6 +42,12 @@ public class Environment
         if (_values.ContainsKey(name.lexeme))
         {
             _values[name.lexeme] = value;
+            return;
+        }
+
+        if(enclosing != null)
+        {
+            enclosing.Assign(name, value);
             return;
         }
 
