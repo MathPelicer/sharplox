@@ -11,6 +11,7 @@
         string outputDir = args[0];
 
         DefineAst(outputDir, "Expr", [
+            "Assign : Token name, Expr value",
             "Binary : Expr left, Token op, Expr right",
             "Grouping: Expr expression",
             "Literal: Object value",

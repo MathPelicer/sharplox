@@ -5,6 +5,7 @@ public abstract class Expr{
     public abstract T Accept<T>(IVisitor<T> visitor);
 
     public interface IVisitor<T>{
+        T VisitAssignExpr(Assign expr);
         T VisitBinaryExpr(Binary expr);
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
@@ -12,6 +13,15 @@ public abstract class Expr{
         T VisitVariableExpr(Variable expr);
     }
 
+    public class Assign(Token name, Expr value) : Expr
+    {
+        public readonly Token _name = name;
+        public readonly Expr _value = value;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitAssignExpr(this);
+        }
+    }
     public class Binary(Expr left, Token op, Expr right) : Expr
     {
         public readonly Expr _left = left;

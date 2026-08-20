@@ -17,5 +17,16 @@ public class Environment
         }
         
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
-    } 
+    }
+
+    internal void Assign(Token name, object value)
+    {
+        if (_values.ContainsKey(name.lexeme))
+        {
+            _values[name.lexeme] = value;
+            return;
+        }
+
+        throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
+    }
 }

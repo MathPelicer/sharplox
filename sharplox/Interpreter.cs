@@ -27,6 +27,14 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         stmt.Accept(this);
     }
 
+    public object VisitAssignExpr(Expr.Assign expr)
+    {
+        object value = Evaluate(expr._value);
+        environment.Assign(expr._name, value);
+
+        return value;
+    }
+
     public object VisitBinaryExpr(Expr.Binary expr)
     {
         object left = Evaluate(expr._left);
@@ -220,4 +228,6 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
         return value.ToString();
     }
+
+    
 }
