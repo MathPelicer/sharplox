@@ -120,7 +120,7 @@ public class Scanner(string source)
             Advance();
         }
 
-        string text = _source.Substring(start, current);
+        string text = _source.Substring(start, lexemeSize);
         
         if(!_keywords.TryGetValue(text, out TokenType tokenType))
         {

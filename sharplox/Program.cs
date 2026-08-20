@@ -15,7 +15,7 @@ public class Program
         if (args.Length > 1)
         {
             Console.WriteLine("Usage: SharpLox [script]");
-            Environment.Exit(64);
+            System.Environment.Exit(64);
         }
         else if (args.Length == 1)
         {
@@ -57,11 +57,11 @@ public class Program
 
             if(_hadError)
             {
-                Environment.Exit(65);
+                System.Environment.Exit(65);
             }
             if (_hadRuntimeError)
             {
-                Environment.Exit(70);
+                System.Environment.Exit(70);
             }
         }
         catch (Exception)

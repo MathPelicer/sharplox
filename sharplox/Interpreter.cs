@@ -4,6 +4,8 @@ namespace sharplox;
 
 public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 {
+    private Environment environment = new();
+    
     public void Interpret(List<Stmt> statements)
     {
         try
@@ -101,18 +103,37 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
-    public object? VisitExpressionStmt(Stmt.Expression stmt)
+    public object VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt._expression);
         return null;
     }
 
-    public object? VisitPrintStmt(Stmt.Print stmt)
+    public object VisitPrintStmt(Stmt.Print stmt)
     {
         object value = Evaluate(stmt._expression);
         Console.WriteLine(Stringify(value));
 
         return null;
+    }
+
+    public object VisitVarStmt(Stmt.Var stmt)
+    {
+        object value = null;
+
+        if(stmt._initializer != null)
+        {
+            value = Evaluate(stmt._initializer);
+        }
+
+        environment.Define(stmt._name.lexeme, value);
+
+        return null;
+    }
+
+    public object VisitVariableExpr(Expr.Variable expr)
+    {
+        return environment.Get(expr._name);
     }
 
     private bool IsTruthy(object obj)
@@ -188,6 +209,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         if(value is double doubleValue)
         {
             string text = doubleValue.ToString();
+
             if (text.EndsWith(".0"))
             {
                 text = text.Substring(0, text.Length - 2);

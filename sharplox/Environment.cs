@@ -1,6 +1,6 @@
 namespace sharplox;
 
-public class Environments
+public class Environment
 {
     private readonly Dictionary<string, object> _values = [];
 
