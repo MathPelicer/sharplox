@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -57,6 +58,7 @@ public class Parser(List<Token> tokens)
 
     // statement -> exprStmt
     //            | printStmt
+    //            | block ;
     private Stmt Statement()
     {
         if (Match(TokenType.PRINT))
@@ -64,7 +66,26 @@ public class Parser(List<Token> tokens)
             return PrintStatement();
         }
 
+        if (Match(TokenType.LEFT_BRACE))
+        {
+            return new Stmt.Block(Block());
+        }
+
         return ExpressionStatement();
+    }
+
+    private List<Stmt> Block()
+    {
+        List<Stmt> statements = [];
+
+        while(!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+        {
+            statements.Add(Declaration());
+        }
+
+        Consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        
+        return statements;
     }
 
     // exprStmt -> expression ";" ;

@@ -5,11 +5,20 @@ public abstract class Stmt{
     public abstract T Accept<T>(IVisitor<T> visitor);
 
     public interface IVisitor<T>{
+        T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
     }
 
+    public class Block(List<Stmt> statements) : Stmt
+    {
+        public readonly List<Stmt> _statements = statements;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitBlockStmt(this);
+        }
+    }
     public class Expression(Expr expression) : Stmt
     {
         public readonly Expr _expression = expression;

@@ -144,6 +144,34 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return environment.Get(expr._name);
     }
 
+    public object VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt._statements, new Environment(environment));
+        return null;
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    {
+        // set global environment to this variable
+        Environment previous = this.environment;
+
+        try
+        {
+            // now the global one is the scoped env
+            this.environment = environment;
+
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            // than the global becomes the outer env.
+            this.environment = previous;
+        }
+    }
+
     private bool IsTruthy(object obj)
     {
         if(obj == null)
@@ -228,6 +256,4 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
         return value.ToString();
     }
-
-    
 }

@@ -20,6 +20,7 @@
         ]);
 
         DefineAst(outputDir, "Stmt", [
+            "Block: List<Stmt> statements",
             "Expression : Expr expression",
             "Print: Expr expression",
             "Var: Token name, Expr initializer"
