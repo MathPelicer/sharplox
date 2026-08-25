@@ -1,6 +1,6 @@
 var a = "global a";
 var b = "global b";
-var c = "global c";
+var c = "global";
 
 {
     var a = "outer a";
@@ -18,7 +18,7 @@ var c = "global c";
     print b;
     print c; 
 }
-
+5+3
 print a;
 print b;
 print c; 

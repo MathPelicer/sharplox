@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -10,6 +9,8 @@ public class Parser(List<Token> tokens)
     private readonly List<Token> _tokens = tokens;
 
     private int current = 0;
+
+    internal bool isRepl = false;
 
     public List<Stmt> Parse()
     {
@@ -52,15 +53,20 @@ public class Parser(List<Token> tokens)
             initializer = Expression();
         }
 
-        Consume(TokenType.SEMICOLON, "Expect ';' adter variable declaration");
+        Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration");
         return new Stmt.Var(name, initializer);
     }
 
     // statement -> exprStmt
+    //            | IfStmt
     //            | printStmt
     //            | block ;
     private Stmt Statement()
     {
+        if (Match(TokenType.IF))
+        {
+            return IfStatement();
+        }
         if (Match(TokenType.PRINT))
         {
             return PrintStatement();
@@ -72,6 +78,24 @@ public class Parser(List<Token> tokens)
         }
 
         return ExpressionStatement();
+    }
+
+    // 
+    private Stmt IfStatement()
+    {
+        Consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = Expression();
+
+        Consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = Statement();
+        Stmt elseBranch = null;
+        if (Match(TokenType.ELSE))
+        {
+            elseBranch = Statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private List<Stmt> Block()
@@ -92,6 +116,11 @@ public class Parser(List<Token> tokens)
     private Stmt ExpressionStatement()
     {
         Expr expr = Expression();
+
+        if (isRepl)
+        {
+            return new Stmt.Expression(expr);
+        }
 
         Consume(TokenType.SEMICOLON, "Expect ';' after expression");
 

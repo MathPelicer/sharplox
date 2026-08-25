@@ -1,4 +1,5 @@
 using sharplox.Expressions;
+using static sharplox.Expressions.Stmt;
 
 namespace sharplox;
 
@@ -13,6 +14,30 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
             foreach (var stmt in statements)
             {
                 Execute(stmt);
+            }
+        }
+        catch (RuntimeError err)
+        {
+            Program.RuntimeError(err);
+            throw;
+        }
+    }
+
+    public void InterpretRepl(List<Stmt> statements)
+    {
+        try
+        {
+            foreach (var stmt in statements)
+            {
+                if(stmt.GetType().ToString() == "sharplox.Expressions.Stmt+Expression")
+                {
+                    object obj = VisitExpressionStmtRepl((Expression)stmt);
+                    Console.WriteLine(obj);
+                }
+                else
+                {
+                    Execute(stmt);
+                }
             }
         }
         catch (RuntimeError err)
@@ -111,6 +136,11 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
+    public object VisitExpressionStmtRepl(Stmt.Expression stmt)
+    {
+        return Evaluate(stmt._expression);
+    }
+
     public object VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt._expression);
@@ -141,12 +171,33 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     public object VisitVariableExpr(Expr.Variable expr)
     {
-        return environment.Get(expr._name);
+        var value = environment.Get(expr._name);
+
+        if(value is null)
+        {
+            throw new RuntimeError(expr._name, "The variable must be initialized before accessed.");
+        }
+
+        return value;
     }
 
     public object VisitBlockStmt(Stmt.Block stmt)
     {
         ExecuteBlock(stmt._statements, new Environment(environment));
+        return null;
+    }
+
+    public object VisitIfStmt(If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt._condition)))
+        {
+            Execute(stmt._thenBranch);
+        }
+        else if(stmt._elseBranch is not null)
+        {
+            Execute(stmt._elseBranch);
+        }
+
         return null;
     }
 

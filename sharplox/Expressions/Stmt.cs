@@ -7,6 +7,7 @@ public abstract class Stmt{
     public interface IVisitor<T>{
         T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
+        T VisitIfStmt(If stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
     }
@@ -25,6 +26,16 @@ public abstract class Stmt{
 
         public override T Accept<T>(IVisitor<T> visitor){
             return visitor.VisitExpressionStmt(this);
+        }
+    }
+    public class If(Expr condition, Stmt thenBranch, Stmt elseBranch) : Stmt
+    {
+        public readonly Expr _condition = condition;
+        public readonly Stmt _thenBranch = thenBranch;
+        public readonly Stmt _elseBranch = elseBranch;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitIfStmt(this);
         }
     }
     public class Print(Expr expression) : Stmt

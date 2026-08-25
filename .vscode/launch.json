@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/sharplox/bin/Debug/net10.0/sharplox.dll",
-            "args": [""]
+            "args": ["${workspaceFolder}/sharplox/tests/test.txt"]
         }
     ]
 }

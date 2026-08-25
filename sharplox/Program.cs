@@ -84,13 +84,13 @@ public class Program
                 break;
             }
 
-            Run(line);
+            Run(line, isRepl: true);
             
             _hadError = false;
         }
     }
 
-    private static void Run(string source)
+    private static void Run(string source, bool isRepl = false)
     {
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
@@ -100,7 +100,11 @@ public class Program
         //     Console.WriteLine(token);
         // }
 
-        Parser parser = new(tokens);
+        Parser parser = new(tokens)
+        {
+            isRepl = isRepl
+        };
+
         List<Stmt> statements = parser.Parse();
 
         if (_hadError)
@@ -108,7 +112,15 @@ public class Program
             return;
         }
 
-        interpreter.Interpret(statements);
+        if (isRepl)
+        {
+            interpreter.InterpretRepl(statements);
+        }
+        else
+        {
+            interpreter.Interpret(statements);
+        }
+        
 
         //Console.WriteLine(new AstPrinter().Print(expr));
     }
