@@ -201,6 +201,28 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
+    public object VisitLogicalExpr(Expr.Logical expr)
+    {
+        object left = Evaluate(expr._left);
+
+        if(expr._op.tokenType == TokenType.OR)
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+        else
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+
+        return Evaluate(expr._right);
+    }
+
     private void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         // set global environment to this variable

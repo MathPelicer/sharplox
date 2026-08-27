@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -144,10 +145,10 @@ public class Parser(List<Token> tokens)
     }
 
     // assignment -> IDENTIFIER "=" assignment
-    //             | equality ;
+    //             | logic_or ;
     private Expr Assignment()
     {
-        Expr expr = Equality();
+        Expr expr = Or();
 
         if (Match(TokenType.EQUAL))
         {
@@ -166,6 +167,35 @@ public class Parser(List<Token> tokens)
         return expr;
     }
 
+    // logical_or -> logic_and ("OR" logic_and)* ;
+    private Expr Or()
+    {
+        Expr expr = And();
+
+        while (Match(TokenType.OR))
+        {
+            Token op = Previous();
+            Expr right = And();
+            expr = new Expr.Logical(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    // logic_and -> equality ("AND" equality)* ;
+    private Expr And()
+    {
+        Expr expr = Equality();
+
+        while (Match(TokenType.AND))
+        {
+            Token op = Previous();
+            Expr right = Equality();
+            expr = new Expr.Logical(expr, op, right);
+        }
+
+        return expr;
+    }
 
     // equality -> comparison ( ( "!=" | "==" ) comparison )* ; 
     private Expr Equality()
