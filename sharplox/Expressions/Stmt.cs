@@ -9,6 +9,7 @@ public abstract class Stmt{
         T VisitExpressionStmt(Expression stmt);
         T VisitIfStmt(If stmt);
         T VisitPrintStmt(Print stmt);
+        T VisitWhileStmt(While stmt);
         T VisitVarStmt(Var stmt);
     }
 
@@ -44,6 +45,15 @@ public abstract class Stmt{
 
         public override T Accept<T>(IVisitor<T> visitor){
             return visitor.VisitPrintStmt(this);
+        }
+    }
+    public class While(Expr condition, Stmt body) : Stmt
+    {
+        public readonly Expr _condition = condition;
+        public readonly Stmt _body = body;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitWhileStmt(this);
         }
     }
     public class Var(Token name, Expr initializer) : Stmt

@@ -136,6 +136,40 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
+    public object VisitVariableExpr(Expr.Variable expr)
+    {
+        var value = environment.Get(expr._name);
+
+        if(value is null)
+        {
+            throw new RuntimeError(expr._name, "The variable must be initialized before accessed.");
+        }
+
+        return value;
+    }
+
+    public object VisitLogicalExpr(Expr.Logical expr)
+    {
+        object left = Evaluate(expr._left);
+
+        if(expr._op.tokenType == TokenType.OR)
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+        else
+        {
+            if (IsTruthy(left))
+            {
+                return left;
+            }
+        }
+
+        return Evaluate(expr._right);
+    }
+
     public object VisitExpressionStmtRepl(Stmt.Expression stmt)
     {
         return Evaluate(stmt._expression);
@@ -169,18 +203,6 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
-    public object VisitVariableExpr(Expr.Variable expr)
-    {
-        var value = environment.Get(expr._name);
-
-        if(value is null)
-        {
-            throw new RuntimeError(expr._name, "The variable must be initialized before accessed.");
-        }
-
-        return value;
-    }
-
     public object VisitBlockStmt(Stmt.Block stmt)
     {
         ExecuteBlock(stmt._statements, new Environment(environment));
@@ -201,26 +223,14 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
-    public object VisitLogicalExpr(Expr.Logical expr)
+    public object VisitWhileStmt(While stmt)
     {
-        object left = Evaluate(expr._left);
-
-        if(expr._op.tokenType == TokenType.OR)
+        while (IsTruthy(Evaluate(stmt._condition)))
         {
-            if (IsTruthy(left))
-            {
-                return left;
-            }
-        }
-        else
-        {
-            if (IsTruthy(left))
-            {
-                return left;
-            }
+            Execute(stmt._body);
         }
 
-        return Evaluate(expr._right);
+        return null;
     }
 
     private void ExecuteBlock(List<Stmt> statements, Environment environment)

@@ -61,6 +61,7 @@ public class Parser(List<Token> tokens)
     // statement -> exprStmt
     //            | IfStmt
     //            | printStmt
+    //            | whileStmt
     //            | block ;
     private Stmt Statement()
     {
@@ -72,7 +73,10 @@ public class Parser(List<Token> tokens)
         {
             return PrintStatement();
         }
-
+        if (Match(TokenType.WHILE))
+        {
+            return WhileStatement();
+        }
         if (Match(TokenType.LEFT_BRACE))
         {
             return new Stmt.Block(Block());
@@ -81,7 +85,7 @@ public class Parser(List<Token> tokens)
         return ExpressionStatement();
     }
 
-    // 
+    // ifStmt -> "if" "(" condition ")" statement ("else" statement)? ;
     private Stmt IfStatement()
     {
         Consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
@@ -126,6 +130,17 @@ public class Parser(List<Token> tokens)
         Consume(TokenType.SEMICOLON, "Expect ';' after expression");
 
         return new Stmt.Expression(expr);
+    }
+
+    // whileStmt -> "while" "(" expression ")" statement ;
+    private Stmt WhileStatement()
+    {
+        Consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
+        Expr condition = Expression();
+        Consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
+
+        Stmt body = Statement();
+        return new Stmt.While(condition, body);
     }
 
     // printStmt -> "print" expression ";" ; 
