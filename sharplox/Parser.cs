@@ -65,6 +65,10 @@ public class Parser(List<Token> tokens)
     //            | block ;
     private Stmt Statement()
     {
+        if (Match(TokenType.FOR))
+        {
+            return ForStatement();
+        }
         if (Match(TokenType.IF))
         {
             return IfStatement();
@@ -83,6 +87,66 @@ public class Parser(List<Token> tokens)
         }
 
         return ExpressionStatement();
+    }
+
+    // forStmt -> "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression ";" statement ;
+    private Stmt ForStatement()
+    {
+        Consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'");
+
+        // (";" | varDecl | exprStmt )
+        Stmt initializer;
+        if (Match(TokenType.SEMICOLON))
+        {
+            initializer = null;
+        }
+        else if (Match(TokenType.VAR))
+        {
+            initializer = VarDeclaration();
+        }
+        else
+        {
+            initializer = ExpressionStatement();
+        }
+
+        // expression?
+        Expr condition = null;
+
+        if (!Check(TokenType.SEMICOLON))
+        {
+            condition = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+        // expression?
+        Expr increment = null;
+
+        if (!Check(TokenType.RIGHT_PAREN))
+        {
+            increment = Expression();
+        }
+
+        Consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        // statement
+        Stmt body = Statement();
+
+        if(increment != null)
+        {
+            body = new Stmt.Block([body, new Stmt.Expression(increment)]);
+        }
+
+        condition ??= new Expr.Literal(true);
+
+        body = new Stmt.While(condition, body);
+
+        if(initializer != null)
+        {
+            body = new Stmt.Block([initializer, body]);
+        }
+
+        return body;
     }
 
     // ifStmt -> "if" "(" condition ")" statement ("else" statement)? ;
