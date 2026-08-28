@@ -18,7 +18,16 @@ var c = "global";
     print b;
     print c; 
 }
-5+3
+
 print a;
 print b;
 print c; 
+
+var a = 0;
+var temp;
+
+for (var b = 1; a < 10000; b = temp + b){
+    print a;
+    temp = a;
+    a = b;
+}
