@@ -20,6 +20,11 @@ public class AstPrinter : Expr.IVisitor<string>
         return Parenthesize(expr._op.lexeme, expr._left, expr._right);
     }
 
+    public string VisitCallExpr(Expr.Call expr)
+    {
+        throw new NotImplementedException();
+    }
+
     public string VisitGroupingExpr(Expr.Grouping expr)
     {
         return Parenthesize("group", expr._expression);

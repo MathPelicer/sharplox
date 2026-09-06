@@ -333,7 +333,7 @@ public class Parser(List<Token> tokens)
     }
 
     // unary -> ( "!" | "-" ) unary
-    //        |  primary ;
+    //        |  call ;
     private Expr Unary()
     {
         if(Match(TokenType.BANG, TokenType.MINUS))
@@ -344,6 +344,48 @@ public class Parser(List<Token> tokens)
         }
 
         return Primary();
+    }
+
+    // call -> primary ( "(" arguments? ")" )* ;
+    private Expr Call()
+    {
+        Expr expr = Primary();
+
+        while (true)
+        {
+            if (Match(TokenType.LEFT_PAREN))
+            {
+                expr = FinishCall(expr);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    // 
+    private Expr FinishCall(Expr callee)
+    {
+        List<Expr> arguments = [];
+
+        if (!Check(TokenType.RIGHT_PAREN))
+        {
+            do
+            {
+                if(arguments.Count >= 255)
+                {
+                    Error(Peek(), " Can't have mor than 255 arguments.");
+                }
+                arguments.Add(Expression());
+            } while (Match(TokenType.COMMA));
+        }
+
+        Token paren = Consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
     }
 
     // primary -> NUMBER | STRING | "true" | "false" | "nil"

@@ -170,6 +170,20 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return Evaluate(expr._right);
     }
 
+    public object VisitCallExpr(Expr.Call expr)
+    {
+        object callee = Evaluate(expr._callee);
+
+        List<object> arguments = [];
+        foreach (var argument in expr._arguments)
+        {
+            arguments.Add(Evaluate(argument));
+        }
+
+        ISharploxCallable function = (ISharploxCallable)callee;
+        return function.Call(this, arguments);
+    }
+
     public object VisitExpressionStmtRepl(Stmt.Expression stmt)
     {
         return Evaluate(stmt._expression);
