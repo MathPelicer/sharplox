@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -24,12 +25,17 @@ public class Parser(List<Token> tokens)
         return statements;
     }
 
-    // declaration -> varDecl
+    // declaration -> funDecl
+    //              | varDecl
     //              | statement ;
     private Stmt Declaration()
     {
         try
         {
+            if (Match(TokenType.FUN))
+            {
+                return Function("function");
+            }
             if (Match(TokenType.VAR))
             {
                 return VarDeclaration();
@@ -42,6 +48,33 @@ public class Parser(List<Token> tokens)
             Syncronize();
             return null;
         }
+    }
+
+    private Stmt Function(string kind)
+    {
+        Token name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+
+        Consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+        List<Token> parameters = [];
+
+        if (!Check(TokenType.RIGHT_PAREN))
+        {
+            do
+            {
+                if(parameters.Count > 255)
+                {
+                    Error(Peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.Add(Consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (Match(TokenType.COMMA));    
+        }
+
+        Consume(TokenType.RIGHT_PAREN, $"Expect ')' after parameters.");
+        Consume(TokenType.LEFT_BRACE, "Expect '{' before" + kind + "body.");
+
+        List<Stmt> body = Block();
+        return new Stmt.Function(name, parameters, body);
     }
 
     private Stmt VarDeclaration()

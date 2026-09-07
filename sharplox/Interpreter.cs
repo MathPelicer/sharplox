@@ -1,3 +1,7 @@
+using System.Net;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using sharplox.Expressions;
 using static sharplox.Expressions.Stmt;
 
@@ -5,8 +9,14 @@ namespace sharplox;
 
 public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 {
-    private Environment environment = new();
-    
+    private static readonly Environment _globals = new();
+    private Environment environment = _globals;
+
+    public Interpreter()
+    {
+        _globals.Define("clock", new ClockNativeFunction());
+}
+
     public void Interpret(List<Stmt> statements)
     {
         try
@@ -173,14 +183,24 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
     public object VisitCallExpr(Expr.Call expr)
     {
         object callee = Evaluate(expr._callee);
-
         List<object> arguments = [];
+        
         foreach (var argument in expr._arguments)
         {
             arguments.Add(Evaluate(argument));
         }
 
+        if(!(callee is SharploxCallable callable))
+        {
+            throw new RuntimeError(expr._paren, "Can only call functions and classes");
+        }
+
         ISharploxCallable function = (ISharploxCallable)callee;
+
+        if(arguments.Count != function.Arity())
+        {
+            throw new RuntimeError(expr._paren, $"Expect {function.Arity()} arguments but got {arguments.Count}.");
+        }
         return function.Call(this, arguments);
     }
 
@@ -352,5 +372,10 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         }
 
         return value.ToString();
+    }
+
+    public object VisitFunctionStmt(Function stmt)
+    {
+        throw new NotImplementedException();
     }
 }
