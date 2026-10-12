@@ -50,11 +50,14 @@ public class Parser(List<Token> tokens)
         }
     }
 
+    // function -> IDENTIFIER "(" parameters? ")" block ;
     private Stmt Function(string kind)
     {
         Token name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
 
         Consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+
+        // parameters -> IDENTIFIER ( "," IDENTIFIER )* ; 
         List<Token> parameters = [];
 
         if (!Check(TokenType.RIGHT_PAREN))
@@ -376,7 +379,7 @@ public class Parser(List<Token> tokens)
             return new Expr.Unary(op, right);
         }
 
-        return Primary();
+        return Call();
     }
 
     // call -> primary ( "(" arguments? ")" )* ;

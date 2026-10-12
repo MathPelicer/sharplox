@@ -1,7 +1,3 @@
-using System.Net;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using sharplox.Expressions;
 using static sharplox.Expressions.Stmt;
 
@@ -9,13 +5,13 @@ namespace sharplox;
 
 public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 {
-    private static readonly Environment _globals = new();
-    private Environment environment = _globals;
+    public static readonly Environment globals = new();
+    private Environment environment = globals;
 
     public Interpreter()
     {
-        _globals.Define("clock", new ClockNativeFunction());
-}
+        globals.Define("clock", new ClockNativeFunction());
+    }
 
     public void Interpret(List<Stmt> statements)
     {
@@ -190,7 +186,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
             arguments.Add(Evaluate(argument));
         }
 
-        if(!(callee is SharploxCallable callable))
+        if(callee is not ISharploxCallable callable)
         {
             throw new RuntimeError(expr._paren, "Can only call functions and classes");
         }
@@ -267,7 +263,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return null;
     }
 
-    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    public void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         // set global environment to this variable
         Environment previous = this.environment;
@@ -376,6 +372,8 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     public object VisitFunctionStmt(Function stmt)
     {
-        throw new NotImplementedException();
+        LoxFunction function = new(stmt);
+        environment.Define(stmt._name.lexeme, function);
+        return null;
     }
 }
