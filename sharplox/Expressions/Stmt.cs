@@ -12,6 +12,7 @@ public abstract class Stmt{
         T VisitPrintStmt(Print stmt);
         T VisitWhileStmt(While stmt);
         T VisitVarStmt(Var stmt);
+        T VisitReturnStmt(Return stmt);
     }
 
     public class Block(List<Stmt> statements) : Stmt
@@ -74,6 +75,15 @@ public abstract class Stmt{
 
         public override T Accept<T>(IVisitor<T> visitor){
             return visitor.VisitVarStmt(this);
+        }
+    }
+    public class Return(Token keyword, Expr value) : Stmt
+    {
+        public readonly Token _keyword = keyword;
+        public readonly Expr _value = value;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitReturnStmt(this);
         }
     }
 }

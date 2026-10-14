@@ -96,8 +96,10 @@ public class Parser(List<Token> tokens)
 
     // statement -> exprStmt
     //            | IfStmt
+    //            | fotStmt
     //            | printStmt
     //            | whileStmt
+    //            | returnStmt
     //            | block ;
     private Stmt Statement()
     {
@@ -121,8 +123,27 @@ public class Parser(List<Token> tokens)
         {
             return new Stmt.Block(Block());
         }
+        if (Match(TokenType.RETURN))
+        {
+            return ReturnStatement();
+        }
 
         return ExpressionStatement();
+    }
+
+    // returnStmt -> "return" expression? ";"
+    private Stmt ReturnStatement()
+    {
+        Token keyword = Previous();
+        Expr value = null;
+
+        if (!Check(TokenType.SEMICOLON))
+        {
+            value = Expression();
+        }
+
+        Consume(TokenType.SEMICOLON, "Expect ';' after return value");
+        return new Stmt.Return(keyword, value);
     }
 
     // forStmt -> "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression ";" statement ;
