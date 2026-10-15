@@ -285,6 +285,25 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         }
     }
 
+    public object VisitFunctionStmt(Function stmt)
+    {
+        LoxFunction function = new(stmt);
+        environment.Define(stmt._name.lexeme, function);
+        return null;
+    }
+
+    public object VisitReturnStmt(Stmt.Return stmt)
+    {
+        object value = null;
+        
+        if(stmt._value is not null)
+        {
+            value = Evaluate(stmt._value);
+        }
+
+        throw new Return(value);
+    }
+
     private bool IsTruthy(object obj)
     {
         if(obj == null)
@@ -368,12 +387,5 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         }
 
         return value.ToString();
-    }
-
-    public object VisitFunctionStmt(Function stmt)
-    {
-        LoxFunction function = new(stmt);
-        environment.Define(stmt._name.lexeme, function);
-        return null;
     }
 }

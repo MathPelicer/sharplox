@@ -19,7 +19,15 @@ public class LoxFunction(Stmt.Function declaration) : ISharploxCallable
             env.Define(_declaration._parameters[i].lexeme, arguments[i]);
         }
 
-        interpreter.ExecuteBlock(_declaration._body, env);
+        try
+        {
+            interpreter.ExecuteBlock(_declaration._body, env);    
+        }
+        catch (Return returnValue)
+        {
+            return returnValue.value;
+        }
+        
         return null;
     }
 
