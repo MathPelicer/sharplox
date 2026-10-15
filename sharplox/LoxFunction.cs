@@ -2,9 +2,11 @@ using sharplox.Expressions;
 
 namespace sharplox;
 
-public class LoxFunction(Stmt.Function declaration) : ISharploxCallable
+public class LoxFunction(Stmt.Function declaration, Environment clojure) : ISharploxCallable
 {
     private readonly Stmt.Function _declaration = declaration;
+
+    private readonly Environment _clojure = clojure;
 
     public int Arity()
     {
@@ -13,7 +15,7 @@ public class LoxFunction(Stmt.Function declaration) : ISharploxCallable
 
     public object Call(Interpreter interpreter, List<object> arguments)
     {
-        Environment env = new(Interpreter.globals);
+        Environment env = new(_clojure);
         for(var i = 0; i < _declaration._parameters.Count; i++)
         {
             env.Define(_declaration._parameters[i].lexeme, arguments[i]);
