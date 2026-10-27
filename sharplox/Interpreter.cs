@@ -58,6 +58,11 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         stmt.Accept(this);
     }
 
+    internal void Resolve(Expr expr, int v)
+    {
+        throw new NotImplementedException();
+    }
+
     public object VisitAssignExpr(Expr.Assign expr)
     {
         object value = Evaluate(expr._value);
