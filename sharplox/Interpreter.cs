@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using sharplox.Expressions;
 using static sharplox.Expressions.Stmt;
 
@@ -7,6 +8,8 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 {
     public static readonly Environment globals = new();
     private Environment environment = globals;
+
+    private readonly Dictionary<Expr, int> locals = [];
 
     public Interpreter()
     {
@@ -58,14 +61,26 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         stmt.Accept(this);
     }
 
-    internal void Resolve(Expr expr, int v)
+    internal void Resolve(Expr expr, int depth)
     {
-        throw new NotImplementedException();
+        locals.Add(expr, depth);
     }
 
     public object VisitAssignExpr(Expr.Assign expr)
     {
         object value = Evaluate(expr._value);
+
+        var isFound = locals.TryGetValue(expr, out var distance);
+
+        if (isFound)
+        {
+            environment.AssignAt(distance, expr._name, value);
+        }
+        else
+        {
+            globals.Assign(expr._name, value);
+        }
+
         environment.Assign(expr._name, value);
 
         return value;
@@ -149,14 +164,20 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     public object VisitVariableExpr(Expr.Variable expr)
     {
-        var value = environment.Get(expr._name);
+        return LookUpVariable(expr._name, expr);
+    }
 
-        if(value is null)
+    private object LookUpVariable(Token name, Expr.Variable expr)
+    {
+        var isFound = locals.TryGetValue(expr, out var distance);
+        if(isFound)
         {
-            throw new RuntimeError(expr._name, "The variable must be initialized before accessed.");
+            return environment.GetAt(distance, name.lexeme);
         }
-
-        return value;
+        else
+        {
+            return globals.Get(name);
+        }
     }
 
     public object VisitLogicalExpr(Expr.Logical expr)

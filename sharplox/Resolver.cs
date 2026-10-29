@@ -45,7 +45,7 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitExpressionStmt(Stmt.Expression stmt)
     {
-        Resolve(stmt);
+        Resolve(stmt._expression);
         return null;
     }
 
@@ -170,7 +170,7 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
-    private void Resolve(List<Stmt> statements)
+    public void Resolve(List<Stmt> statements)
     {
         foreach (var statement in statements)
         {

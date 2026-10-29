@@ -112,6 +112,9 @@ public class Program
             return;
         }
 
+        Resolver resolver = new(interpreter);
+        resolver.Resolve(statements);
+
         if (isRepl)
         {
             interpreter.InterpretRepl(statements);

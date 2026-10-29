@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Net;
 
 namespace sharplox;
 
@@ -52,5 +53,27 @@ public class Environment
         }
 
         throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
+    }
+
+    internal void AssignAt(int distance, Token name, object value)
+    {
+        Ancestor(distance)._values.Add(name.lexeme, value);
+    }
+
+    internal object GetAt(int distance, string name)
+    {
+        return Ancestor(distance)._values[name];
+    }
+
+    // walks up the parents of the environments as much as needed (distance)
+    private Environment Ancestor(int distance)
+    {
+        Environment environment = this;
+        for (int i = 0; i < distance; i++)
+        {
+            environment = environment.enclosing;
+        }
+
+        return environment;
     }
 }
