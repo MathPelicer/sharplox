@@ -17,7 +17,9 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitBinaryExpr(Expr.Binary expr)
     {
-        throw new NotImplementedException();
+        Resolve(expr._left);
+        Resolve(expr._right);
+        return null;
     }
 
     public object VisitBlockStmt(Stmt.Block stmt)
@@ -31,52 +33,94 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitCallExpr(Expr.Call expr)
     {
-        throw new NotImplementedException();
+        Resolve(expr._callee);
+
+        foreach (var argument in expr._arguments)
+        {
+            Resolve(argument);
+        }
+
+        return null;
     }
 
     public object VisitExpressionStmt(Stmt.Expression stmt)
     {
-        throw new NotImplementedException();
+        Resolve(stmt);
+        return null;
     }
 
     public object VisitFunctionStmt(Stmt.Function stmt)
     {
-        throw new NotImplementedException();
+        Declare(stmt._name);
+        Define(stmt._name);
+        ResolveFunction(stmt);
+        return null;
+    }
+
+    private void ResolveFunction(Stmt.Function function)
+    {
+        BeginScope();
+        foreach (var parameter in function._parameters)
+        {
+            Declare(parameter);
+            Define(parameter);
+        }
+
+        Resolve(function._body);
+        EndScope();
     }
 
     public object VisitGroupingExpr(Expr.Grouping expr)
     {
-        throw new NotImplementedException();
+        Resolve(expr._expression);
+        return null;
     }
 
     public object VisitIfStmt(Stmt.If stmt)
     {
-        throw new NotImplementedException();
+        Resolve(stmt._condition);
+        Resolve(stmt._thenBranch);
+        
+        if(stmt._elseBranch != null)
+        {
+            Resolve(stmt._elseBranch);
+        }
+
+        return null;
     }
 
     public object VisitLiteralExpr(Expr.Literal expr)
     {
-        throw new NotImplementedException();
+        return null;
     }
 
     public object VisitLogicalExpr(Expr.Logical expr)
     {
-        throw new NotImplementedException();
+        Resolve(expr._left);
+        Resolve(expr._right);
+        return null;
     }
 
     public object VisitPrintStmt(Stmt.Print stmt)
     {
-        throw new NotImplementedException();
+        Resolve(stmt._expression);
+        return null;
     }
 
     public object VisitReturnStmt(Stmt.Return stmt)
     {
-        throw new NotImplementedException();
+        if(stmt._value != null)
+        {
+            Resolve(stmt._value);
+        }
+
+        return null;
     }
 
     public object VisitUnaryExpr(Expr.Unary expr)
     {
-        throw new NotImplementedException();
+        Resolve(expr._right);
+        return null;
     }
 
     public object VisitVariableExpr(Expr.Variable expr)
@@ -115,31 +159,15 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
-    private void Define(Token name)
-    {
-        if (!_scopes.Any())
-        {
-            return;
-        }
+    
 
-        _scopes.Peek().Add(name.lexeme, true);
-    }
-
-    private void Declare(Token name)
-    {
-        if (!_scopes.Any())
-        {
-            return;
-        }
-
-        Dictionary<string, bool> scope = [];
-
-        scope.Add(name.lexeme, false);
-    }
+    
 
     public object VisitWhileStmt(Stmt.While stmt)
     {
-        throw new NotImplementedException();
+        Resolve(stmt._condition);
+        Resolve(stmt._body);
+        return null;
     }
 
     private void Resolve(List<Stmt> statements)
@@ -168,5 +196,27 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
     private void EndScope()
     {
         _scopes.Pop();
+    }
+
+    private void Define(Token name)
+    {
+        if (!_scopes.Any())
+        {
+            return;
+        }
+
+        _scopes.Peek().Add(name.lexeme, true);
+    }
+
+    private void Declare(Token name)
+    {
+        if (!_scopes.Any())
+        {
+            return;
+        }
+
+        Dictionary<string, bool> scope = [];
+
+        scope.Add(name.lexeme, false);
     }
 }
