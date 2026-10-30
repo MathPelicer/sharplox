@@ -8,6 +8,8 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
+    private FunctionType currentFunction = FunctionType.NONE;
+
     public object VisitAssignExpr(Expr.Assign expr)
     {
         Resolve(expr._value);
@@ -53,21 +55,8 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
     {
         Declare(stmt._name);
         Define(stmt._name);
-        ResolveFunction(stmt);
+        ResolveFunction(stmt, FunctionType.FUNCTION);
         return null;
-    }
-
-    private void ResolveFunction(Stmt.Function function)
-    {
-        BeginScope();
-        foreach (var parameter in function._parameters)
-        {
-            Declare(parameter);
-            Define(parameter);
-        }
-
-        Resolve(function._body);
-        EndScope();
     }
 
     public object VisitGroupingExpr(Expr.Grouping expr)
@@ -109,6 +98,11 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitReturnStmt(Stmt.Return stmt)
     {
+        if(currentFunction == FunctionType.NONE)
+        {
+            Program.Error(stmt._keyword, "Can't return from top-level code");    
+        }
+
         if(stmt._value != null)
         {
             Resolve(stmt._value);
@@ -134,18 +128,6 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
-    private void ResolveLocal(Expr expr, Token name)
-    {
-        for (int i = _scopes.Count - 1; i >= 0; i--)
-        {
-            if (_scopes.ElementAt(i).ContainsKey(name.lexeme))
-            {
-                _interpreter.Resolve(expr, _scopes.Count - 1 - i);
-                return;
-            }
-        }
-    }
-
     public object VisitVarStmt(Stmt.Var stmt)
     {
         Declare(stmt._name);
@@ -158,10 +140,6 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         Define(stmt._name);
         return null;
     }
-
-    
-
-    
 
     public object VisitWhileStmt(Stmt.While stmt)
     {
@@ -215,8 +193,38 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
             return;
         }
 
-        Dictionary<string, bool> scope = [];
+        Dictionary<string, bool> scope = _scopes.Peek();
 
         scope.Add(name.lexeme, false);
+    }
+
+    private void ResolveLocal(Expr expr, Token name)
+    {
+        for (int i = _scopes.Count - 1; i >= 0; i--)
+        {
+            if (_scopes.ElementAt(i).ContainsKey(name.lexeme))
+            {
+                _interpreter.Resolve(expr, _scopes.Count - 1 - i);
+                return;
+            }
+        }
+    }
+
+    private void ResolveFunction(Stmt.Function function, FunctionType functionType)
+    {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = functionType;
+
+        BeginScope();
+        foreach (var parameter in function._parameters)
+        {
+            Declare(parameter);
+            Define(parameter);
+        }
+
+        Resolve(function._body);
+        EndScope();
+
+        currentFunction = enclosingFunction;
     }
 }

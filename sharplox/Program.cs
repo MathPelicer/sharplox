@@ -115,6 +115,11 @@ public class Program
         Resolver resolver = new(interpreter);
         resolver.Resolve(statements);
 
+        if (_hadError)
+        {
+            return;
+        }
+
         if (isRepl)
         {
             interpreter.InterpretRepl(statements);
