@@ -57,12 +57,13 @@ public class Environment
 
     internal void AssignAt(int distance, Token name, object value)
     {
-        Ancestor(distance)._values.Add(name.lexeme, value);
+        Ancestor(distance)._values[name.lexeme] = value;
     }
 
     internal object GetAt(int distance, string name)
     {
-        return Ancestor(distance)._values[name];
+        Ancestor(distance)._values.TryGetValue(name, out var ancestorValue);
+        return ancestorValue;
     }
 
     // walks up the parents of the environments as much as needed (distance)
