@@ -63,7 +63,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     internal void Resolve(Expr expr, int depth)
     {
-        locals.Add(expr, depth);
+        locals[expr] = depth;
     }
 
     public object VisitAssignExpr(Expr.Assign expr)
@@ -80,8 +80,6 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         {
             globals.Assign(expr._name, value);
         }
-
-        environment.Assign(expr._name, value);
 
         return value;
     }
@@ -138,7 +136,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     public object VisitGroupingExpr(Expr.Grouping expr)
     {
-        throw new NotImplementedException();
+        return Evaluate(expr._expression);
     }
 
     public object VisitLiteralExpr(Expr.Literal expr)
