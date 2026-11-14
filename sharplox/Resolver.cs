@@ -8,12 +8,15 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
+    private readonly List<Token> _unusedScope = new();
+
     private FunctionType currentFunction = FunctionType.NONE;
 
     public object VisitAssignExpr(Expr.Assign expr)
     {
         Resolve(expr._value);
         ResolveLocal(expr, expr._name);
+        Used(expr._name);
         return null;
     }
 
@@ -119,12 +122,19 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitVariableExpr(Expr.Variable expr)
     {
-        if(_scopes.Any() && _scopes.Peek()[expr._name.lexeme] == false)
+        if(_scopes.Any())
         {
-            Program.Error(expr._name, "Can't read variable in its own initializer");
+            var varExists = _scopes.Peek().TryGetValue(expr._name.lexeme, out var value);
+
+            if(varExists && value == false)
+            {
+                Program.Error(expr._name, "Can't read variable in its own initializer");
+            }
+            
         }
 
         ResolveLocal(expr, expr._name);
+        Used(expr._name);
         return null;
     }
 
@@ -153,6 +163,14 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         foreach (var statement in statements)
         {
             Resolve(statement);
+        }
+
+        if (_unusedScope.Any())
+        {
+            foreach (var ununsedVar in _unusedScope)
+            {
+                Program.Error(ununsedVar, "This is an unused variable");
+            }
         }
     }
 
@@ -183,7 +201,10 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
             return;
         }
 
-        _scopes.Peek().Add(name.lexeme, true);
+        Dictionary<string, bool> scope = _scopes.Peek();
+        scope[name.lexeme] = true;
+
+        _unusedScope.Add(name);
     }
 
     private void Declare(Token name)
@@ -195,16 +216,32 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
         Dictionary<string, bool> scope = _scopes.Peek();
 
-        scope.Add(name.lexeme, false);
+        if (scope.ContainsKey(name.lexeme))
+        {
+            Program.Error(name, "Already a variable with this name in this scope");
+        }
+
+        scope[name.lexeme] = false;
+    }
+
+    private void Used(Token name)
+    {
+        var variable = _unusedScope.FirstOrDefault(x => x.lexeme == name.lexeme);
+
+        if(variable is not null)
+        {
+            _unusedScope.Remove(variable);    
+        }
+        System.Console.WriteLine(name.lexeme + " is used");
     }
 
     private void ResolveLocal(Expr expr, Token name)
     {
-        for (int i = _scopes.Count - 1; i >= 0; i--)
+        for (int i = 0; i <= _scopes.Count - 1; i++)
         {
             if (_scopes.ElementAt(i).ContainsKey(name.lexeme))
             {
-                _interpreter.Resolve(expr, _scopes.Count - 1 - i);
+                _interpreter.Resolve(expr, i);
                 return;
             }
         }
