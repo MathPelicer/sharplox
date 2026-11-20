@@ -239,7 +239,7 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         {
             _unusedScope.Remove(variable);    
         }
-        System.Console.WriteLine(name.lexeme + " is used");
+        System.Console.WriteLine("[DEBUG] " + name.lexeme + " is used");
     }
 
     private void ResolveLocal(Expr expr, Token name)

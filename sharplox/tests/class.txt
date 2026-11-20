@@ -5,3 +5,8 @@ class Caderno{
 }
 
 print Caderno;
+
+class Coffee{}
+var coffee = Coffee();
+
+print coffee;
