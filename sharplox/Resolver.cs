@@ -48,6 +48,12 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
+    public object VisitGetExpr(Expr.Get expr)
+    {
+        Resolve(expr._obj);
+        return null;
+    }
+
     public object VisitExpressionStmt(Stmt.Expression stmt)
     {
         Resolve(stmt._expression);

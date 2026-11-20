@@ -428,7 +428,7 @@ public class Parser(List<Token> tokens)
         return Call();
     }
 
-    // call -> primary ( "(" arguments? ")" )* ;
+    // call -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     private Expr Call()
     {
         Expr expr = Primary();
@@ -438,6 +438,11 @@ public class Parser(List<Token> tokens)
             if (Match(TokenType.LEFT_PAREN))
             {
                 expr = FinishCall(expr);
+            }
+            else if (Match(TokenType.DOT))
+            {
+                Token name = Consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             }
             else
             {

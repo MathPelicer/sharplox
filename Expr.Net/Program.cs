@@ -14,6 +14,7 @@
             "Assign : Token name, Expr value",
             "Binary : Expr left, Token op, Expr right",
             "Call : Expr callee, Token paren, List<Expr> arguments",
+            "Get: Expr obj, Token name",
             "Grouping: Expr expression",
             "Literal: Object value",
             "Logical: Expr left, Token op, Expr right",
