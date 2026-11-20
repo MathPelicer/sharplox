@@ -328,6 +328,17 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         throw new Return(value);
     }
 
+    public object VisitClassStmt(Class stmt)
+    {
+        environment.Define(stmt._name.lexeme, null);
+
+        LoxClass loxClass = new(stmt._name.lexeme);
+        
+        environment.Assign(stmt._name, loxClass);
+
+        return null;
+    }
+
     private bool IsTruthy(object obj)
     {
         if(obj == null)

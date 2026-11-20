@@ -158,6 +158,13 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
+    public object VisitClassStmt(Stmt.Class stmt)
+    {
+        Declare(stmt._name);
+        Define(stmt._name);
+        return null;
+    }
+
     public void Resolve(List<Stmt> statements)
     {
         foreach (var statement in statements)

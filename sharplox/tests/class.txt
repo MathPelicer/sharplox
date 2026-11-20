@@ -1,0 +1,7 @@
+class Caderno{
+    escrever(){
+        return "rabisco rabisco";
+    }
+}
+
+print Caderno;

@@ -25,13 +25,18 @@ public class Parser(List<Token> tokens)
         return statements;
     }
 
-    // declaration -> funDecl
+    // declaration -> classDecl
+    //              | funDecl
     //              | varDecl
     //              | statement ;
     private Stmt Declaration()
     {
         try
         {
+            if (Match(TokenType.CLASS))
+            {
+                return ClassDeclaration();
+            }
             if (Match(TokenType.FUN))
             {
                 return Function("function");
@@ -50,8 +55,28 @@ public class Parser(List<Token> tokens)
         }
     }
 
+    // classDecl -> "class" IDENTIFIER "{" function* "}" ; 
+    private Stmt.Class ClassDeclaration()
+    {
+        // at this point the "class" keyword was already consumed
+        Token name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+
+        Consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
+
+        List<Stmt.Function> methods = [];
+
+        while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+        {
+            methods.Add(Function("method"));
+        }
+
+        Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body");
+
+        return new Stmt.Class(name, methods);
+    }
+
     // function -> IDENTIFIER "(" parameters? ")" block ;
-    private Stmt Function(string kind)
+    private Stmt.Function Function(string kind)
     {
         Token name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
 
