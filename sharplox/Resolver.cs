@@ -144,6 +144,13 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
+    public object VisitSetExpr(Expr.Set expr)
+    {
+        Resolve(expr._value);
+        Resolve(expr._obj);
+        return null;
+    }
+
     public object VisitVarStmt(Stmt.Var stmt)
     {
         Declare(stmt._name);

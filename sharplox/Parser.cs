@@ -305,7 +305,7 @@ public class Parser(List<Token> tokens)
         return Assignment();
     }
 
-    // assignment -> IDENTIFIER "=" assignment
+    // assignment -> ( call "." )? IDENTIFIER "=" assignment
     //             | logic_or ;
     private Expr Assignment()
     {
@@ -320,6 +320,10 @@ public class Parser(List<Token> tokens)
             {
                 Token name = variable._name;
                 return new Expr.Assign(name, value);
+            }
+            else if (expr is Expr.Get get)
+            {
+                return new Expr.Set(get._obj, get._name, value);
             }
 
             Error(equals, "Invalid assingment target.");

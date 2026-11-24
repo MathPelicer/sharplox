@@ -17,7 +17,12 @@ public class LoxInstance(LoxClass loxClass)
         }
 
         throw new RuntimeError(name, $"Undefined property '{name.lexeme}'.");
-    } 
+    }
+
+    internal void Set(Token name, object value)
+    {
+        fields[name.lexeme] = value;
+    }
 
     public override string ToString()
     {

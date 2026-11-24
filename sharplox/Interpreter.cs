@@ -236,6 +236,21 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return new RuntimeError(expr._name, "Only instances have properties.");
     }
 
+    public object VisitSetExpr(Expr.Set expr)
+    {
+        object obj = Evaluate(expr._obj);
+
+        if(obj is not LoxInstance)
+        {
+            throw new RuntimeError(expr._name, "Only instances have fields.");
+        }
+
+        object value = Evaluate(expr._value);
+        ((LoxInstance)obj).Set(expr._name, value);
+        
+        return value;
+    }
+
     public object VisitExpressionStmtRepl(Stmt.Expression stmt)
     {
         return Evaluate(stmt._expression);

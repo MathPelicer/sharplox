@@ -9,6 +9,7 @@ public abstract class Expr{
         T VisitBinaryExpr(Binary expr);
         T VisitCallExpr(Call expr);
         T VisitGetExpr(Get expr);
+        T VisitSetExpr(Set expr);
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
         T VisitLogicalExpr(Logical expr);
@@ -52,6 +53,16 @@ public abstract class Expr{
 
         public override T Accept<T>(IVisitor<T> visitor){
             return visitor.VisitGetExpr(this);
+        }
+    }
+    public class Set(Expr obj, Token name, Expr value) : Expr
+    {
+        public readonly Expr _obj = obj;
+        public readonly Token _name = name;
+        public readonly Expr _value = value;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitSetExpr(this);
         }
     }
     public class Grouping(Expr expression) : Expr
