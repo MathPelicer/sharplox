@@ -20,7 +20,7 @@ public class LoxInstance(LoxClass loxClass)
 
         if(method is not null)
         {
-            return method;
+            return method.Bind(this);
         }
 
         throw new RuntimeError(name, $"Undefined property '{name.lexeme}'.");

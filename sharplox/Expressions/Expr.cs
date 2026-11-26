@@ -10,6 +10,7 @@ public abstract class Expr{
         T VisitCallExpr(Call expr);
         T VisitGetExpr(Get expr);
         T VisitSetExpr(Set expr);
+        T VisitThisExpr(This expr);
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
         T VisitLogicalExpr(Logical expr);
@@ -63,6 +64,14 @@ public abstract class Expr{
 
         public override T Accept<T>(IVisitor<T> visitor){
             return visitor.VisitSetExpr(this);
+        }
+    }
+    public class This(Token keyword) : Expr
+    {
+        public readonly Token _keyword = keyword;
+
+        public override T Accept<T>(IVisitor<T> visitor){
+            return visitor.VisitThisExpr(this);
         }
     }
     public class Grouping(Expr expression) : Expr

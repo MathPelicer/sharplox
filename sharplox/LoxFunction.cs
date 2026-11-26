@@ -37,4 +37,12 @@ public class LoxFunction(Stmt.Function declaration, Environment clojure) : IShar
     {
         return $"<fn {_declaration._name.lexeme}>";
     }
+
+    internal LoxFunction Bind(LoxInstance loxInstance)
+    {
+        Environment environment = new(_clojure);
+        environment.Define("this", loxInstance);
+
+        return new LoxFunction(_declaration, environment);
+    }
 }

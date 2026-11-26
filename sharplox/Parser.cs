@@ -495,7 +495,6 @@ public class Parser(List<Token> tokens)
         {
             return new Expr.Literal(null);
         }
-
         else if(Match(TokenType.NUMBER, TokenType.STRING))
         {
             return new Expr.Literal(Previous().literal);
@@ -503,6 +502,10 @@ public class Parser(List<Token> tokens)
         else if (Match(TokenType.IDENTIFIER))
         {
             return new Expr.Variable(Previous());
+        }
+        else if (Match(TokenType.THIS))
+        {
+            return new Expr.This(Previous());
         }
         else if (Match(TokenType.LEFT_PAREN))
         {

@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using sharplox.Expressions;
 using static sharplox.Expressions.Stmt;
 
@@ -165,7 +164,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         return LookUpVariable(expr._name, expr);
     }
 
-    private object LookUpVariable(Token name, Expr.Variable expr)
+    private object LookUpVariable(Token name, Expr expr)
     {
         var isFound = locals.TryGetValue(expr, out var distance);
         if(isFound)
@@ -249,6 +248,11 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         ((LoxInstance)obj).Set(expr._name, value);
         
         return value;
+    }
+
+    public object VisitThisExpr(Expr.This expr)
+    {
+        return LookUpVariable(expr._keyword, expr);
     }
 
     public object VisitExpressionStmtRepl(Stmt.Expression stmt)

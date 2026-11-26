@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using sharplox.Expressions;
 
 namespace sharplox;
@@ -151,6 +152,12 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         return null;
     }
 
+    public object VisitThisExpr(Expr.This expr)
+    {
+        ResolveLocal(expr, expr._keyword);
+        return null;
+    }
+
     public object VisitVarStmt(Stmt.Var stmt)
     {
         Declare(stmt._name);
@@ -176,11 +183,18 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
         Declare(stmt._name);
         Define(stmt._name);
 
+        BeginScope();
+        
+        _scopes.Peek()["this"] = true;
+
         foreach (Stmt.Function method in stmt._methods)
         {
             FunctionType declaration = FunctionType.METHOD;
             ResolveFunction(method, declaration);
         }
+
+        EndScope();
+        
         return null;
     }
 
