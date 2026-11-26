@@ -175,6 +175,12 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
     {
         Declare(stmt._name);
         Define(stmt._name);
+
+        foreach (Stmt.Function method in stmt._methods)
+        {
+            FunctionType declaration = FunctionType.METHOD;
+            ResolveFunction(method, declaration);
+        }
         return null;
     }
 

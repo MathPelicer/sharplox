@@ -230,7 +230,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
         if(obj is LoxInstance instance)
         {
-            return (LoxInstance)instance.Get(expr._name);
+            return instance.Get(expr._name);
         }
 
         return new RuntimeError(expr._name, "Only instances have properties.");
@@ -359,7 +359,14 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
     {
         environment.Define(stmt._name.lexeme, null);
 
-        LoxClass loxClass = new(stmt._name.lexeme);
+        Dictionary<string, LoxFunction> methods = [];
+        foreach (Function method in stmt._methods)
+        {
+            LoxFunction function = new(method, environment);
+            methods[method._name.lexeme] = function;
+        }
+
+        LoxClass loxClass = new(stmt._name.lexeme, methods);
         
         environment.Assign(stmt._name, loxClass);
 
