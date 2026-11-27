@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace sharplox;
 
 public class LoxClass(string name, Dictionary<string, LoxFunction> methods) : ISharploxCallable
@@ -9,12 +11,26 @@ public class LoxClass(string name, Dictionary<string, LoxFunction> methods) : IS
     // validate if the number of arguments passed is the right one.
     public int Arity()
     {
-        return 0;
+        LoxFunction initializer = FindMethod("init");
+
+        if(initializer == null)
+        {
+            return 0;
+        }
+
+        return initializer.Arity();
     }
 
     public object Call(Interpreter interpreter, List<object> arguments)
     {
         LoxInstance instance = new(this);
+        LoxFunction initializer = FindMethod("init");
+
+        if(initializer != null)
+        {
+            initializer.Bind(instance).Call(interpreter, arguments);
+        }
+
         return instance;
     }
 
