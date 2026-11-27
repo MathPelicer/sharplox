@@ -13,6 +13,12 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     private FunctionType currentFunction = FunctionType.NONE;
 
+    private enum ClassType {
+        NONE, CLASS
+    }
+
+    private ClassType currentClass = ClassType.NONE;
+
     public object VisitAssignExpr(Expr.Assign expr)
     {
         Resolve(expr._value);
@@ -154,6 +160,12 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitThisExpr(Expr.This expr)
     {
+        if(currentClass == ClassType.NONE)
+        {
+            Program.Error(expr._keyword, "Can't use 'this' outside of a class");
+            return null;
+        }
+
         ResolveLocal(expr, expr._keyword);
         return null;
     }
@@ -180,6 +192,9 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
     public object VisitClassStmt(Stmt.Class stmt)
     {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         Declare(stmt._name);
         Define(stmt._name);
 
@@ -195,6 +210,7 @@ public class Resolver(Interpreter interpreter) : Expr.IVisitor<object>, Stmt.IVi
 
         EndScope();
         
+        currentClass = enclosingClass;
         return null;
     }
 
