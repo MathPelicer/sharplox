@@ -2,11 +2,13 @@ using sharplox.Expressions;
 
 namespace sharplox;
 
-public class LoxFunction(Stmt.Function declaration, Environment clojure) : ISharploxCallable
+public class LoxFunction(Stmt.Function declaration, Environment clojure, bool isInitilizer) : ISharploxCallable
 {
     private readonly Stmt.Function _declaration = declaration;
 
     private readonly Environment _clojure = clojure;
+
+    private readonly bool IsInitializer = isInitilizer;
 
     public int Arity()
     {
@@ -29,7 +31,12 @@ public class LoxFunction(Stmt.Function declaration, Environment clojure) : IShar
         {
             return returnValue.value;
         }
-        
+
+        if (IsInitializer)
+        {
+            return _clojure.GetAt(0, "this");
+        }
+
         return null;
     }
 
@@ -43,6 +50,6 @@ public class LoxFunction(Stmt.Function declaration, Environment clojure) : IShar
         Environment environment = new(_clojure);
         environment.Define("this", loxInstance);
 
-        return new LoxFunction(_declaration, environment);
+        return new LoxFunction(_declaration, environment, IsInitializer);
     }
 }

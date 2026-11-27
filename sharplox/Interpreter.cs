@@ -342,7 +342,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
 
     public object VisitFunctionStmt(Function stmt)
     {
-        LoxFunction function = new(stmt, environment);
+        LoxFunction function = new(stmt, environment, false);
         environment.Define(stmt._name.lexeme, function);
         return null;
     }
@@ -366,7 +366,7 @@ public class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<object>
         Dictionary<string, LoxFunction> methods = [];
         foreach (Function method in stmt._methods)
         {
-            LoxFunction function = new(method, environment);
+            LoxFunction function = new(method, environment, method._name.lexeme.Equals("init"));
             methods[method._name.lexeme] = function;
         }
 
